@@ -1,0 +1,57 @@
+{
+  "name": "tensai-kit",
+  "version": "1.0.0",
+  "description": "An autonomous DeFi AI Agent Kit on Katana enabling AI agents to plan and execute on-chain financial operations.",
+  "author": "tensaikit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "clean": "rmdir /s /q dist",
+    "dev": "tsc --watch"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.43",
+    "@privy-io/server-auth": "^1.18.4",
+    "decimal.js": "^10.5.0",
+    "reflect-metadata": "^0.2.2",
+    "sharp": "^0.33.5",
+    "sushi": "^5.0.32",
+    "undici": "^7.7.0",
+    "viem": "^2.24.2",
+    "zod": "^3.24.2"
+  },
+  "keywords": [
+    "tensai",
+    "tensai-kit",
+    "sdk",
+    "typescript",
+    "katana",
+    "defi",
+    "ai-agent",
+    "autonomous-agents",
+    "langchain",
+    "blockchain",
+    "web3",
+    "onchain",
+    "automation",
+    "financial-automation",
+    "agentkit",
+    "evm"
+  ]
+}

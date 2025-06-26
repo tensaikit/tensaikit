@@ -1,0 +1,42 @@
+/**
+ * Common error types used across the application
+ */
+
+export enum ErrorCode {
+  // Wallet related errors
+  WALLET_NOT_FOUND = "WALLET_NOT_FOUND",
+  INVALID_WALLET = "INVALID_WALLET",
+  WALLET_CONNECTION_FAILED = "WALLET_CONNECTION_FAILED",
+
+  // Network related errors
+  NETWORK_ERROR = "NETWORK_ERROR",
+  INVALID_NETWORK = "INVALID_NETWORK",
+  RPC_ERROR = "RPC_ERROR",
+
+  // Transaction related errors
+  TRANSACTION_FAILED = "TRANSACTION_FAILED",
+  INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS",
+  GAS_ESTIMATION_FAILED = "GAS_ESTIMATION_FAILED",
+
+  // Contract related errors
+  CONTRACT_ERROR = "CONTRACT_ERROR",
+  INVALID_CONTRACT = "INVALID_CONTRACT",
+
+  // Validation errors
+  INVALID_INPUT = "INVALID_INPUT",
+  MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD",
+
+  // General errors
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+  NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
+  CONFIGURATION_ERROR = "CONFIGURATION_ERROR",
+
+  API_CALL_FAILED = "API_CALL_FAILED",
+  TOKEN_METADATA_ERROR = "TOKEN_METADATA_ERROR",
+}
+
+export interface ErrorResponse {
+  code: ErrorCode;
+  message: string;
+  details?: unknown;
+}
