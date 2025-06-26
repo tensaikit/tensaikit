@@ -1,7 +1,7 @@
 import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { ViemWalletProvider } from "./viemWalletProvider";
-import { createWalletClient, http, WalletClient } from "viem";
+import { Chain, createWalletClient, http, WalletClient } from "viem";
 import { getChain } from "../network/network";
 import { PrivyWalletConfig, PrivyWalletExport } from "./privyShared";
 
@@ -13,6 +13,7 @@ import { PrivyWalletConfig, PrivyWalletExport } from "./privyShared";
 export interface PrivyEvmWalletConfig extends PrivyWalletConfig {
   /** Optional chain ID to connect to */
   chainId?: string;
+  chain?: Chain;
 }
 
 /**
@@ -123,7 +124,8 @@ export class PrivyEvmWalletProvider extends ViemWalletProvider {
 
     const chainId = config.chainId || "129399";
 
-    const chain = getChain(chainId);
+    // TODO: Remove below code once Katana is available on Viem and is public
+    const chain = chainId === "129399" ? config.chain : getChain(chainId);
     if (!chain) {
       throw new Error(`Chain with ID ${chainId} not found`);
     }

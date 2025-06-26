@@ -7,6 +7,7 @@ import { EvmWalletProvider } from "../../walletProviders";
 import { Network } from "../../network";
 import {
   BorrowSchema,
+  GetMarketInfoSchema,
   RepaySchema,
   SupplyCollateralSchema,
   SupplySchema,
@@ -33,6 +34,88 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
    */
   constructor() {
     super("morpho.protocol", []);
+  }
+
+  /**
+   * Fetches Morpho Blue market details using a given market ID.
+   *
+   * @param walletProvider - Instance of EvmWalletProvider used to interact with the chain.
+   * @param marketId - The unique bytes32 identifier for the Morpho market.
+   * @returns Market parameters returned by the `idToMarketParams` function.
+   * @throws Will throw an error if:
+   *   - The network or chainId is invalid.
+   *   - The market ID is invalid or returns no information.
+   */
+  @CreateAction({
+    name: "get_market_info",
+    description: `
+    This action fetches detailed parameters of a Morpho Blue market using a given market ID.
+
+    Inputs:
+    - marketId: Unique ID of the market (bytes32 hash)
+
+    The response includes:
+    - loanToken
+    - collateralToken
+    - oracle
+    - interest rate model
+    - max loan-to-value (LLTV)
+
+    Use this to inspect market configuration before interacting with it.
+    Example valid marketId:
+    0x10b2d9edc87a5b62f8a6ac3a274b248e7219060d594617c41147c1ef116faee3
+  `,
+    schema: GetMarketInfoSchema,
+  })
+  async getMarketInfo(
+    walletProvider: EvmWalletProvider,
+    args: z.infer<typeof GetMarketInfoSchema>
+  ): Promise<string> {
+    const network = walletProvider.getNetwork();
+    const chainId = network.chainId;
+    if (!chainId) {
+      throw createError(
+        "Invalid or missing network",
+        ErrorCode.INVALID_NETWORK
+      );
+    }
+
+    const morphoBlueContractAddress = getMorphoBlueContractAddress(
+      Number(chainId)
+    ) as Hex;
+
+    try {
+      const marketResponse = await walletProvider.readContract({
+        address: morphoBlueContractAddress,
+        abi: MORPHO_BLUE_ABI,
+        functionName: "idToMarketParams",
+        args: [args.marketId],
+      });
+
+      if (!marketResponse) {
+        throw createError(
+          "Invalid market id or missing market information",
+          ErrorCode.INVALID_INPUT
+        );
+      }
+      const loanToken = marketResponse[0];
+      const collateralToken = marketResponse[1];
+      const oracle = marketResponse[2];
+      const irm = marketResponse[3];
+      const lltv = marketResponse[4];
+
+      return `
+        Market Info for ID: ${args.marketId}
+        --------------------------------
+        • Loan Token:        ${loanToken}
+        • Collateral Token:  ${collateralToken}
+        • Oracle:            ${oracle}
+        • Interest Rate Model (IRM): ${irm}
+        • Max LLTV (Loan-to-Value):  ${lltv.toString()}
+        `.trim();
+    } catch (error) {
+      throw handleError("Error depositing to Morpho Vault", error);
+    }
   }
 
   /**

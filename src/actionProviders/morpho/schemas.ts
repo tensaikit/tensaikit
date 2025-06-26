@@ -1,6 +1,18 @@
 import { z } from "zod";
 
 /**
+ * Input schema for Morpho Blue get market information.
+ */
+export const GetMarketInfoSchema = z
+  .object({
+    marketId: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid marketId (bytes32 hex)")
+      .describe("The unique bytes32 identifier of the Morpho Blue market"),
+  })
+  .describe("Input schema for fetching Morpho Blue market parameters");
+
+/**
  * Input schema for Morpho Blue supply action.
  */
 export const SupplySchema = z

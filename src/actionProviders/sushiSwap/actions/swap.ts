@@ -17,7 +17,7 @@ import {
   SUSHI_QUOTE_ENDPOINT,
   SushiSwapModule,
 } from "../utlis";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, PublicClient } from "viem";
 import Decimal from "decimal.js";
 import { approve, allowance, isNativeToken } from "../../../utils";
 
@@ -200,10 +200,19 @@ export class SushiSwapSwapActions extends ActionProvider<EvmWalletProvider> {
       const { tx } = swapData;
 
       // Step 2: Simulate swap
-      const publicClient = createPublicClient({
-        chain: NETWORK_ID_TO_VIEM_CHAIN[networkId],
-        transport: http(),
-      });
+      // TODO: Remove below code once Katana is available on Viem and is public
+      let publicClient: PublicClient;
+      if (chainId === "129399") {
+        publicClient = createPublicClient({
+          chain: walletProvider.getChain(),
+          transport: http(),
+        });
+      } else {
+        publicClient = createPublicClient({
+          chain: NETWORK_ID_TO_VIEM_CHAIN[networkId],
+          transport: http(),
+        });
+      }
 
       const simulation = await publicClient.call({
         account: tx.from,

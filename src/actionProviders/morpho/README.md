@@ -21,6 +21,7 @@ morpho/
 
 ### Protocol Actions (MorphoProtocolActionProvider)
 
+- `get_market_info`: Fetches detailed parameters of a Morpho Blue market using a given market ID
 - `query_account`: Fetches user account positions and activity.
 - `get_lender_interest_rates`: Fetches current lending interest rates.
 - `get_borrower_interest_rates`: Fetches current borrowing interest rates.

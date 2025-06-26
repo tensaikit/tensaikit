@@ -12,7 +12,7 @@ import {
   Abi,
   ContractFunctionName,
   ContractFunctionArgs,
-  WalletClient,
+  Chain,
 } from "viem";
 import { Network } from "../network";
 import { CHAIN_ID_TO_NETWORK_ID } from "../network/network";
@@ -206,8 +206,12 @@ export class ViemWalletProvider extends EvmWalletProvider {
     return "viem_wallet_provider";
   }
 
-  getWalletClient(): WalletClient {
-    return this.#walletClient;
+  // TODO: Remove below code once Katana is available on Viem and is public
+  getChain(): Chain {
+    if (!this.#walletClient.chain) {
+      throw new Error("Wallet client chain is undefined");
+    }
+    return this.#walletClient.chain;
   }
 
   /**
