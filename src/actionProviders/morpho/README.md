@@ -38,7 +38,7 @@ morpho/
 
 ## Network Support
 
-The Morpho provider supports Katana and Polygon POS.
+The Morpho provider supports Katana.
 
 ## Notes
 

@@ -1,11 +1,11 @@
-# Wallet Action Provider
+# Sushi Action Provider
 
 This directory contains the **SushiSwapActionProvider** implementation, DEX functionality for token prices, liquidity data, and token swaps.
 
 ## Directory Structure
 
 ```
-wallet/
+sushiSwap/
 ├── actions
 │   ├── index.ts                    # Aggregated export for SushiSwap actions
 │   ├── liquidity.ts                # SushiSwap liquidity-related actions
@@ -34,4 +34,4 @@ wallet/
 
 ## Network Support
 
-The wallet provider is blockchain-agnostic.
+The Sushi Swap Provider supports Katana.
