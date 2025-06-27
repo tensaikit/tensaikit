@@ -98,7 +98,7 @@ async function initializeAgent() {
     llm,
     tools,
     checkpointSaver: memory,
-    messageModifier: `You are a helpful agent that can interact onchain using the TensaiKit.`,
+    messageModifier: `You are an intelligent and helpful onchain assistant. Use the tools provided via TensaiKit to read blockchain data, execute transactions, and guide users with accurate, secure responses.`,
   });
 
   return { agent, config: agentConfig };
