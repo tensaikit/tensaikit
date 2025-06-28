@@ -1,0 +1,24 @@
+{
+  "name": "langchain-sushi-chatbot",
+  "description": "Tensaikit + TypeScript SDK Chatbot Example",
+  "version": "1.0.0",
+  "private": true,
+  "author": "tensaikit",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "ts-node ./chatbot.ts",
+    "dev": "nodemon ./chatbot.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.19",
+    "@langchain/langgraph": "^0.2.21",
+    "@langchain/openai": "^0.3.14",
+    "dotenv": "^16.4.5",
+    "tensaikit": "^1.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2"
+  }
+}

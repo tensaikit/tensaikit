@@ -1,0 +1,34 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore build output directories
+build/
+dist/
+out/
+coverage/
+
+# Node.js dependencies
+node_modules/
+
+# Python dependencies
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Logs
+*.log
+
+# OS-generated files
+*.swp
+.sass-cache/
+*.tmp
+
+# IDE configuration files
+.vscode/
+.idea/
+
+# Ignore secrets and environment files
+.env
+.env.local
