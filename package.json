@@ -1,6 +1,6 @@
 {
   "name": "tensaikit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An autonomous DeFi AI Agent Kit on Katana enabling AI agents to plan and execute on-chain financial operations.",
   "author": "tensaikit",
   "main": "dist/index.js",
@@ -30,7 +30,6 @@
     "@privy-io/server-auth": "^1.18.4",
     "decimal.js": "^10.5.0",
     "reflect-metadata": "^0.2.2",
-    "sharp": "^0.33.5",
     "sushi": "^5.0.32",
     "undici": "^7.7.0",
     "viem": "^2.24.2",
@@ -51,7 +50,6 @@
     "onchain",
     "automation",
     "financial-automation",
-    "agentkit",
     "evm"
   ]
 }
