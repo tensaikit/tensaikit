@@ -2,6 +2,8 @@ import { z } from "zod";
 import { ActionProvider } from "../actionProvider";
 import { CreateAction } from "../actionDecorator";
 import { AlchemyTokenPricesBySymbolSchema } from "./schemas";
+import { wrapAndStringify } from "../../common/utils";
+import { handleError } from "../../common/errors";
 
 /**
  * Configuration options for initializing the AlchemyTokenPricesActionProvider.
@@ -28,7 +30,7 @@ export class AlchemyTokenPricesActionProvider extends ActionProvider {
    * @throws If no valid API key is provided via config or environment.
    */
   constructor(config: AlchemyTokenPricesActionProviderConfig = {}) {
-    super("alchemyTokenPrices", []);
+    super("alchemy_token_prices", []);
 
     config.apiKey ||= process.env.ALCHEMY_API_KEY || "";
     if (!config.apiKey) {
@@ -96,13 +98,12 @@ export class AlchemyTokenPricesActionProvider extends ActionProvider {
       }
 
       const data = await response.json();
-      return `Successfully fetched token prices by symbol:\n${JSON.stringify(
-        data,
-        null,
-        2
-      )}`;
+      return wrapAndStringify(
+        "alchemy_token_prices.token_prices_by_symbol",
+        data
+      );
     } catch (error) {
-      return `Error fetching token prices by symbol: ${error}`;
+      throw handleError("Error fetching token prices by symbol", error);
     }
   }
 

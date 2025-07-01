@@ -94,7 +94,6 @@ export class PrivyEvmWalletProvider extends ViemWalletProvider {
         walletId = wallet.id;
         address = wallet.address as `0x${string}`;
       } catch (error) {
-        console.error(error);
         if (
           error instanceof Error &&
           error.message.includes(

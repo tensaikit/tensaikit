@@ -18,7 +18,7 @@ import {
   queryLenderInterestRates,
   queryMarkets,
 } from "./subGraphQuery";
-import { objectToString } from "../../common/utils/objectToString";
+import { wrapAndStringify } from "../../common/utils";
 
 /**
  * Configuration options for initializing the MorphoSubgraphActionProvider.
@@ -96,10 +96,16 @@ export class MorphoSubgraphActionProvider extends ActionProvider<EvmWalletProvid
       );
 
       if (!response || !response.account) {
-        return `No data found for account: ${args.account}`;
+        return wrapAndStringify(
+          "morpho.subgraph.query_account",
+          `No data found for account: ${args.account}`
+        );
       }
 
-      return objectToString(response.account);
+      return wrapAndStringify(
+        "morpho.subgraph.query_account",
+        response.account
+      );
     } catch (error) {
       throw handleError("Error fetching Morpho account", error);
     }
@@ -153,10 +159,16 @@ export class MorphoSubgraphActionProvider extends ActionProvider<EvmWalletProvid
       );
 
       if (!response || !response.interestRates) {
-        return `No data found!`;
+        return wrapAndStringify(
+          "morpho.subgraph.get_lender_interest_rates",
+          "No data found!"
+        );
       }
 
-      return objectToString(response.interestRates);
+      return wrapAndStringify(
+        "morpho.subgraph.get_lender_interest_rates",
+        response.interestRates
+      );
     } catch (error) {
       throw handleError("Error fetching Morpho account", error);
     }
@@ -210,10 +222,16 @@ export class MorphoSubgraphActionProvider extends ActionProvider<EvmWalletProvid
       );
 
       if (!response || !response.interestRates) {
-        return `No data found!`;
+        return wrapAndStringify(
+          "morpho.subgraph.get_borrower_interest_rates",
+          "No data found!"
+        );
       }
 
-      return objectToString(response.interestRates);
+      return wrapAndStringify(
+        "morpho.subgraph.get_borrower_interest_rates",
+        response.interestRates
+      );
     } catch (error) {
       throw handleError("Error fetching Morpho account", error);
     }
@@ -263,10 +281,16 @@ export class MorphoSubgraphActionProvider extends ActionProvider<EvmWalletProvid
       );
 
       if (!response || !response.markets) {
-        return `No data found!`;
+        return wrapAndStringify(
+          "morpho.subgraph.get_active_markets",
+          "No data found!"
+        );
       }
 
-      return objectToString(response.markets);
+      return wrapAndStringify(
+        "morpho.subgraph.get_active_markets",
+        response.markets
+      );
     } catch (error) {
       throw handleError("Error fetching Morpho markets", error);
     }

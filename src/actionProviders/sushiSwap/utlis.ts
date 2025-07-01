@@ -1,6 +1,3 @@
-import { createError, ErrorCode } from "../../common/errors";
-import { fetchFromApi } from "../../common/utils/fetchFromApi";
-
 // SushiSwap base API endpoints
 export const SUSHI_ENDPOINT = "https://api.sushi.com";
 export const SUSHI_QUOTE_ENDPOINT = SUSHI_ENDPOINT + "/quote/v7";
@@ -43,31 +40,19 @@ export const getSpender = (chainId: number): `0x${string}` => {
 };
 
 /**
- * Fetches metadata for a token (e.g., decimals, symbol, name) from SushiSwap's public API.
+ * Returns the subgraph endpoint URL for querying Sushi protocol data
+ * from The Graph on a supported chain.
  *
- * @param chainId - Chain ID the token belongs to
- * @param tokenAddress - The ERC20 token contract address
- * @returns An object containing token metadata
- * @throws If the API call fails or returns an error
+ * @param chainId - The numeric Chain ID of the network
+ * @returns The Graph subgraph URL
+ * @throws If the chain ID is not supported for subgraph access
  */
-export const fetchTokenMetadata = async (
-  chainId: number,
-  tokenAddress: string
-) => {
-  try {
-    const metadata = await fetchFromApi<{
-      chainId: number;
-      address: `0x{string}`;
-      decimals: number;
-      symbol: string;
-      name: string;
-    }>(`${SUSHI_TOKEN_ENDPOINT}/${chainId}/${tokenAddress}`);
+export const subGraphUrlByChainId = (chainId: number) => {
+  switch (chainId) {
+    case 129399: // Katana
+      return "https://gateway-arbitrum.network.thegraph.com/api/subgraphs/id/2YG7eSFHx1Wm9SHKdcrM8HR23JQpVe8fNNdmDHMXyVYR";
 
-    return metadata;
-  } catch (error: any) {
-    throw createError(
-      "Failed to fetch token information",
-      ErrorCode.API_CALL_FAILED
-    );
+    default:
+      throw new Error(`${chainId} not supported for Morpho Blue.`);
   }
 };

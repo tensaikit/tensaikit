@@ -6,6 +6,8 @@ import { GetBalanceSchema, TransferSchema } from "./schemas";
 import { abi } from "./constants";
 import { encodeFunctionData, formatUnits, Hex } from "viem";
 import { EvmWalletProvider } from "../../walletProviders";
+import { wrapAndStringify } from "../../common/utils";
+import { handleError } from "../../common/errors";
 
 /**
  * ERC20ActionProvider provides actions to interact with ERC20 tokens such as
@@ -50,12 +52,15 @@ export class ERC20ActionProvider extends ActionProvider<EvmWalletProvider> {
         args: [],
       });
 
-      return `Balance of ${args.contractAddress} is ${formatUnits(
-        balance,
-        decimals
-      )}`;
+      return wrapAndStringify(
+        "erc20.get_balance",
+        `Balance of ${args.contractAddress} is ${formatUnits(
+          balance,
+          decimals
+        )}`
+      );
     } catch (error) {
-      return `Error getting balance: ${error}`;
+      throw handleError("Error getting balance.", error);
     }
   }
 
@@ -98,9 +103,12 @@ export class ERC20ActionProvider extends ActionProvider<EvmWalletProvider> {
 
       await walletProvider.waitForTransactionReceipt(hash);
 
-      return `Transferred ${args.amount} of ${args.contractAddress} to ${args.destination}.\nTransaction hash for the transfer: ${hash}`;
+      return wrapAndStringify(
+        "erc20.transfer",
+        `Transferred ${args.amount} of ${args.contractAddress} to ${args.destination}.\nTransaction hash for the transfer: ${hash}`
+      );
     } catch (error) {
-      return `Error transferring the asset: ${error}`;
+      throw handleError("Error transferring the asset.", error);
     }
   }
 

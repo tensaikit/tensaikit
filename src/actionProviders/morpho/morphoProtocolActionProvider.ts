@@ -23,6 +23,7 @@ import {
   getMorphoBlueContractAddress,
   MORPHO_SUPPORTED_PROTOCOL,
 } from "./utils";
+import { wrapAndStringify } from "../../common/utils";
 
 /**
  * MorphoProtocolActionProvider is an action provider for Morpho Vault interactions.
@@ -104,15 +105,18 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
       const irm = marketResponse[3];
       const lltv = marketResponse[4];
 
-      return `
-        Market Info for ID: ${args.marketId}
-        --------------------------------
-        • Loan Token:        ${loanToken}
-        • Collateral Token:  ${collateralToken}
-        • Oracle:            ${oracle}
-        • Interest Rate Model (IRM): ${irm}
-        • Max LLTV (Loan-to-Value):  ${lltv.toString()}
-        `.trim();
+      return wrapAndStringify(
+        "morpho.protocol.get_market_info",
+        [
+          `Market Info for ID: ${args.marketId} \n`,
+          `--------------------------------`,
+          `• Loan Token:        ${loanToken}`,
+          `• Collateral Token:  ${collateralToken}`,
+          `• Oracle:            ${oracle}`,
+          `• Interest Rate Model (IRM): ${irm}`,
+          `• Max LLTV (Loan-to-Value):  ${lltv.toString()}`,
+        ].join("\n")
+      );
     } catch (error) {
       throw handleError("Error depositing to Morpho Vault", error);
     }
@@ -160,7 +164,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.supply",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -214,7 +221,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
           atomicAssets
         );
         if (approvalResult.startsWith("Error")) {
-          return `Error approving Morpho Vault as spender: ${approvalResult}`;
+          return wrapAndStringify(
+            "morpho.protocol.supply",
+            `Error approving Morpho Vault as spender: ${approvalResult}`
+          );
         } else {
           console.log(approvalResult);
         }
@@ -239,13 +249,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Deposited ${
-        args.assets
-      } tokens (loanToken: ${loanToken}) to Morpho Market Id ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.supply",
+        `Deposited ${
+          args.assets
+        } tokens (loanToken: ${loanToken}) to Morpho Market Id ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error depositing to Morpho Vault", error);
     }
@@ -295,7 +308,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.withdraw",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -353,13 +369,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Withdrew  ${
-        args.assets
-      } tokens (loanToken: ${loanToken}) from Morpho Market ID ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.withdraw",
+        `Withdrew  ${
+          args.assets
+        } tokens (loanToken: ${loanToken}) from Morpho Market ID ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error withdrawing from Morpho Vault", error);
     }
@@ -407,7 +426,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.supply_collateral",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -461,7 +483,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
           atomicAssets
         );
         if (approvalResult.startsWith("Error")) {
-          return `Error approving Morpho Vault as spender: ${approvalResult}`;
+          return wrapAndStringify(
+            "morpho.protocol.supply_collateral",
+            `Error approving Morpho Vault as spender: ${approvalResult}`
+          );
         } else {
           console.log(approvalResult);
         }
@@ -480,13 +505,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Supplied collateral ${
-        args.assets
-      } tokens (loanToken: ${collateralToken}) to Morpho Market Id ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.supply_collateral",
+        `Supplied collateral ${
+          args.assets
+        } tokens (loanToken: ${collateralToken}) to Morpho Market Id ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error depositing to Morpho Vault", error);
     }
@@ -536,7 +564,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.withdraw_collateral",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -593,13 +624,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Withdrew collateral ${
-        args.assets
-      } tokens (collateralToken: ${collateralToken}) from Morpho Market ID ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.withdraw_collateral",
+        `Withdrew collateral ${
+          args.assets
+        } tokens (collateralToken: ${collateralToken}) from Morpho Market ID ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error withdrawing from Morpho Vault", error);
     }
@@ -648,7 +682,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.borrow",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -708,13 +745,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Borrowed ${
-        args.assets
-      } tokens (loanToken: ${loanToken}) from Morpho Market ID ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.borrow",
+        `Borrowed ${
+          args.assets
+        } tokens (loanToken: ${loanToken}) from Morpho Market ID ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error borrowing from Morpho Vault", error);
     }
@@ -759,7 +799,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
     const assets = new Decimal(args.assets);
 
     if (assets.lessThanOrEqualTo(0)) {
-      return "Error: Assets amount must be greater than 0";
+      return wrapAndStringify(
+        "morpho.protocol.repay",
+        "Error: Assets amount must be greater than 0"
+      );
     }
 
     const network = walletProvider.getNetwork();
@@ -813,7 +856,10 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
           atomicAssets
         );
         if (approvalResult.startsWith("Error")) {
-          return `Error approving Morpho Vault as spender: ${approvalResult}`;
+          return wrapAndStringify(
+            "morpho.protocol.repay",
+            `Error approving Morpho Vault as spender: ${approvalResult}`
+          );
         } else {
           console.log(approvalResult);
         }
@@ -838,13 +884,16 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
 
       const receipt = await walletProvider.waitForTransactionReceipt(txHash);
 
-      return `Repaid ${
-        args.assets
-      } of tokens (loanToken: ${loanToken}) from Morpho Market ID ${
-        args.marketId
-      } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
-        receipt
-      )}`;
+      return wrapAndStringify(
+        "morpho.protocol.repay",
+        `Repaid ${
+          args.assets
+        } of tokens (loanToken: ${loanToken}) from Morpho Market ID ${
+          args.marketId
+        } with transaction hash: ${txHash}\nTransaction receipt: ${objectToString(
+          receipt
+        )}`
+      );
     } catch (error) {
       throw handleError("Error repaying to Morpho Vault", error);
     }
