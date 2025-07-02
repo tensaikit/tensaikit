@@ -1,12 +1,14 @@
 import { Chain } from "viem/chains";
 import * as chains from "viem/chains";
-import { katana } from "./katanaNetwork";
+import { katana } from "./katana";
+import { katanaTestnet } from "./katanaTestnet";
 
 /**
  * Maps EVM chain IDs to tensai-kit network IDs.
  */
 export const CHAIN_ID_TO_NETWORK_ID: Record<number, string> = {
-  129399: "katana-network",
+  747474: "katana-mainnet",
+  129399: "katana-testnet",
 };
 
 /**
@@ -23,7 +25,8 @@ export const NETWORK_ID_TO_CHAIN_ID: Record<string, string> = Object.entries(
  * Maps tensai-kit network IDs to Viem chain objects
  */
 export const NETWORK_ID_TO_VIEM_CHAIN: Record<string, Chain> = {
-  "katana-network": katana(""),
+  "katana-mainnet": katana(),
+  "katana-testnet": katanaTestnet(""),
 };
 
 /**

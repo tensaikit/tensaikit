@@ -1,3 +1,4 @@
 export * from "./network";
 export * from "./types";
-export * from "./katanaNetwork";
+export * from "./katana";
+export * from "./katanaTestnet";

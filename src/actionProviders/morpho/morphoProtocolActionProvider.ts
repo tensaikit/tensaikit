@@ -900,7 +900,6 @@ export class MorphoProtocolActionProvider extends ActionProvider<EvmWalletProvid
   }
 
   supportsNetwork = (network: Network) => {
-    console.log("network", network);
     return (
       network.protocolFamily === "evm" &&
       MORPHO_SUPPORTED_PROTOCOL.includes(network.networkId!)

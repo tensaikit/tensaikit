@@ -1,15 +1,15 @@
 import { defineChain } from "viem";
 
 /**
- * Returns a Katana chain definition compatible with viem's client setup.
+ * Returns a Katana Testnet chain definition compatible with viem's client setup.
  *
  * @param katanaApiKey - Optional API key for the RPC endpoint.
- * @returns A `Chain` object for the Katana Network.
+ * @returns A `Chain` object for the Katana Testnet.
  */
-export const katana = (katanaApiKey: string = "") =>
+export const katanaTestnet = (katanaApiKey: string = "") =>
   /*#__PURE__*/ defineChain({
     id: 129399,
-    name: "Katana Network",
+    name: "Katana Testnet",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     rpcUrls: {
       default: {

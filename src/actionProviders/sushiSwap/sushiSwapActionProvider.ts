@@ -7,6 +7,7 @@ import {
   SushiSwapQuoteActions,
   SushiSwapTokenActions,
 } from "./actions";
+import { SUSHISWAP_SUPPORTED_NETWORK } from "./utlis";
 
 /**
  * Configuration options for initializing the SushiSwapActionProvider.
@@ -61,7 +62,9 @@ export class SushiSwapActionProvider extends ActionProvider<EvmWalletProvider> {
    * @param network - The network to validate.
    * @returns `true` if the network uses the EVM protocol family, else `false`.
    */
-  supportsNetwork = (network: Network) => network.protocolFamily === "evm";
+  supportsNetwork = (network: Network) =>
+    network.protocolFamily === "evm" &&
+    SUSHISWAP_SUPPORTED_NETWORK.includes(network.networkId!);
 }
 
 /**
