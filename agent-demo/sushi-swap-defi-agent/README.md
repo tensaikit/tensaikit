@@ -57,7 +57,7 @@ CHAIN_ID="129399"
 From the examples directory:
 
 ```bash
-cd examples/langchain-sushi-chatbot
+cd agent-demo/sushi-swap-defi-agent
 npm install
 npm start
 ```
