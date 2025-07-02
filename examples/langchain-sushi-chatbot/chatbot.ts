@@ -4,7 +4,7 @@ import {
   ViemWalletProvider,
   erc20ActionProvider,
   sushiSwapActionProvider,
-  katana,
+  katanaTestnet,
 } from "tensaikit";
 import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
@@ -116,7 +116,7 @@ const initializeAgent = async () => {
     // Set up Wallet Client using Katana network
     const client = createWalletClient({
       account,
-      chain: katana(process.env.KATANA_RPC_API_KEY),
+      chain: katanaTestnet(process.env.KATANA_RPC_API_KEY),
       transport: http(),
     });
 

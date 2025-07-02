@@ -33,7 +33,6 @@ export const fetchAllTokensFromSubgraph = async (
 
     return response.tokens;
   } catch (error: any) {
-    console.log("error", error);
     throw handleError("Failed to fetch all tokens from subgraph", error);
   }
 };
