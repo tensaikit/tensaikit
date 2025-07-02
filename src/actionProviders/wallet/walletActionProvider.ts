@@ -6,6 +6,8 @@ import { WalletProvider } from "../../walletProviders";
 import { Network } from "../../network";
 
 import { NativeTransferSchema, GetWalletDetailsSchema } from "./schemas";
+import { wrapAndStringify } from "../../common/utils";
+import { handleError } from "../../common/errors";
 
 const PROTOCOL_FAMILY_TO_TERMINOLOGY: Record<
   string,
@@ -16,12 +18,6 @@ const PROTOCOL_FAMILY_TO_TERMINOLOGY: Record<
     displayUnit: "ETH",
     type: "Transaction hash",
     verb: "transaction",
-  },
-  svm: {
-    unit: "LAMPORTS",
-    displayUnit: "SOL",
-    type: "Signature",
-    verb: "transfer",
   },
 };
 
@@ -75,18 +71,21 @@ export class WalletActionProvider extends ActionProvider {
         PROTOCOL_FAMILY_TO_TERMINOLOGY[network.protocolFamily] ||
         DEFAULT_TERMINOLOGY;
 
-      return [
-        "Wallet Details:",
-        `- Provider: ${name}`,
-        `- Address: ${address}`,
-        "- Network:",
-        `  * Protocol Family: ${network.protocolFamily}`,
-        `  * Network ID: ${network.networkId || "N/A"}`,
-        `  * Chain ID: ${network.chainId || "N/A"}`,
-        `- Native Balance: ${balance.toString()} ${terminology.unit}`,
-      ].join("\n");
+      return wrapAndStringify(
+        "wallet.get_wallet_details",
+        [
+          "Wallet Details:",
+          `- Provider: ${name}`,
+          `- Address: ${address}`,
+          "- Network:",
+          `  * Protocol Family: ${network.protocolFamily}`,
+          `  * Network ID: ${network.networkId || "N/A"}`,
+          `  * Chain ID: ${network.chainId || "N/A"}`,
+          `- Native Balance: ${balance.toString()} ${terminology.unit}`,
+        ].join("\n")
+      );
     } catch (error) {
-      return `Error getting wallet details: ${error}`;
+      throw handleError("Error getting wallet details.", error);
     }
   }
 
@@ -126,15 +125,18 @@ Important notes:
       }
 
       const result = await walletProvider.nativeTransfer(args.to, args.value);
-      return [
-        `Transferred ${args.value} ${terminology.displayUnit} to ${args.to}`,
-        `${terminology.type}: ${result}`,
-      ].join("\n");
+      return wrapAndStringify(
+        "wallet.native_transfer",
+        [
+          `Transferred ${args.value} ${terminology.displayUnit} to ${args.to}`,
+          `${terminology.type}: ${result}`,
+        ].join("\n")
+      );
     } catch (error) {
       const { protocolFamily } = walletProvider.getNetwork();
       const terminology =
         PROTOCOL_FAMILY_TO_TERMINOLOGY[protocolFamily] || DEFAULT_TERMINOLOGY;
-      return `Error during ${terminology.verb}: ${error}`;
+      throw handleError(`Error during ${terminology.verb}`, error);
     }
   }
 

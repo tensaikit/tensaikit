@@ -7,7 +7,7 @@ This directory contains the **MorphoSubgraphActionProvider** and **MorphoProtoco
 ```
 morpho/
 ├── abi
-│   ├── morphoBlueABI.ts
+│   └── morphoBlueABI.ts
 ├── morphoProtocolActionProvider.ts         # Handles supply, withdraw, borrow, repay, collateral interactions
 ├── morphoSubgraphActionProvider.ts         # Handles subgraph queries (markets, interest rates, account data)
 ├── schemas.ts                              # Lending/borrowing action schemas

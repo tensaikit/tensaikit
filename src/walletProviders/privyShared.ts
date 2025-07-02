@@ -87,7 +87,6 @@ export async function createPrivyWallet(
     });
     return { wallet, privy };
   } catch (error) {
-    console.error(error);
     if (
       error instanceof Error &&
       error.message.includes("Missing `privy-authorization-signature` header")

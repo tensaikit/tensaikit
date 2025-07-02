@@ -3,22 +3,26 @@ import { ActionProvider } from "../../actionProvider";
 import { CreateAction } from "../../actionDecorator";
 import { EvmWalletProvider } from "../../../walletProviders";
 import { createError, ErrorCode, handleError } from "../../../common/errors";
-import { objectToString } from "../../../common/utils/objectToString";
 import { Network } from "../../../network";
-import {
-  GetAllTokenPricesSchema,
-  GetTokenDetailsSchema,
-  GetTokenPriceSchema,
-} from "../schemas";
-import { fetchTokenMetadata, SushiSwapModule } from "../utlis";
+import { GetAllTokenPricesSchema, GetTokenPriceSchema } from "../schemas";
+import { fetchAllTokenPrices, fetchTokenPrice } from "../logic";
+import { wrapAndStringify } from "../../../common/utils";
 
 /**
- * Provides price and metadata-related actions for tokens on SushiSwap.
- * Supports fetching all token prices, a single token price, and token metadata.
+ * SushiSwapPriceActions provides methods to fetch token prices from SushiSwap.
+ *
+ * This action group offers price-related utilities using SushiSwap's pricing module,
+ * allowing access to both individual token prices and bulk price data for all tokens
+ * on a connected EVM-compatible network.
+ *
+ * Responsibilities:
+ * - Fetch USD prices for all tokens supported by SushiSwap on a given chain
+ * - Fetch USD price for a specific token using its contract address
+ *
  */
 export class SushiSwapPriceActions extends ActionProvider<EvmWalletProvider> {
   constructor() {
-    super("sushiSwap.price", []);
+    super("sushi_swap.price", []);
   }
 
   /**
@@ -48,10 +52,11 @@ export class SushiSwapPriceActions extends ActionProvider<EvmWalletProvider> {
           ErrorCode.INVALID_NETWORK
         );
       }
-      const sushiSwapModule = await SushiSwapModule();
-      const typedChainId = chainId as keyof typeof sushiSwapModule.prices;
-      const response = await sushiSwapModule.prices(typedChainId);
-      return objectToString(response);
+      const response = await fetchAllTokenPrices(chainId);
+      return wrapAndStringify(
+        "sushi_swap.price.get_all_token_prices",
+        response
+      );
     } catch (error) {
       throw handleError("Failed to fetch all token prices", error);
     }
@@ -91,51 +96,13 @@ export class SushiSwapPriceActions extends ActionProvider<EvmWalletProvider> {
           ErrorCode.INVALID_NETWORK
         );
       }
-      const sushiSwapModule = await SushiSwapModule();
-      const typedChainId = chainId as keyof typeof sushiSwapModule.price;
-      const response = await sushiSwapModule.price(
-        typedChainId,
-        tokenAddress as `0x${string}`
+      const response = await fetchTokenPrice(chainId, tokenAddress);
+      return wrapAndStringify(
+        "sushi_swap.price.get_token_price",
+        response.toString()
       );
-      return objectToString(response);
     } catch (error) {
       throw handleError("Failed to fetch token price", error);
-    }
-  }
-
-  /**
-   * Fetches metadata for a token (e.g., decimals, symbol, name) from SushiSwap's public API.
-   *
-   * @param walletProvider - Instance of EVM-compatible WalletProvider
-   * @param args - Includes `tokenAddress` of the token to fetch metadata for
-   * @returns A JSON string containing token metadata
-   * @throws If the API call fails or the token is unsupported
-   */
-  @CreateAction({
-    name: "get_token_details",
-    description: `
-    Retrieves metadata for a specific token on a chain.
-
-    Inputs:
-    - chainId: Chain ID of the network.
-    - tokenAddress: Contract address of the token.
-
-    Notes:
-    - Ensure the token address is valid and supported by SushiSwap.
-  `,
-    schema: GetTokenDetailsSchema,
-  })
-  async getTokenDetails(
-    walletProvider: EvmWalletProvider,
-    args: z.infer<typeof GetTokenDetailsSchema>
-  ): Promise<string> {
-    try {
-      const { tokenAddress } = args;
-      const chainId = walletProvider.getNetwork().chainId;
-      const response = await fetchTokenMetadata(Number(chainId), tokenAddress);
-      return objectToString(response);
-    } catch (error) {
-      throw handleError("Failed to retrieve token details", error);
     }
   }
 

@@ -50,7 +50,7 @@ export interface PrivyEvmDelegatedEmbeddedWalletConfig
 /**
  * A wallet provider that uses Privy's embedded wallets with delegation.
  * This provider extends the EvmWalletProvider to provide Privy-specific wallet functionality
- * while maintaining compatibility with the base wallet provider interface.
+ * while maintaining compatibility with the wallet provider interface.
  */
 export class PrivyEvmDelegatedEmbeddedWalletProvider extends WalletProvider {
   #walletId: string;
