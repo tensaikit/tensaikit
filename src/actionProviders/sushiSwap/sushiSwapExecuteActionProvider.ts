@@ -4,7 +4,7 @@ import { ActionProvider } from "../actionProvider";
 import { Network } from "../../network";
 import { CreateAction } from "../actionDecorator";
 import { GetExecuteSwapSchema } from "./schemas";
-import { DEFAULT_MAX_SLIPPAGE } from "./utlis";
+import { DEFAULT_MAX_SLIPPAGE, SUSHISWAP_SUPPORTED_NETWORK } from "./utlis";
 import { prepareAndSendSwapTransaction } from "./logic";
 import { wrapAndStringify } from "../../common/utils";
 import { handleError } from "../../common/errors";
@@ -76,7 +76,9 @@ export class SushiSwapExecuteOnlyActionProvider extends ActionProvider<EvmWallet
    * @param network - The network to validate.
    * @returns `true` if the network uses the EVM protocol family, else `false`.
    */
-  supportsNetwork = (network: Network) => network.protocolFamily === "evm";
+  supportsNetwork = (network: Network) =>
+    network.protocolFamily === "evm" &&
+    SUSHISWAP_SUPPORTED_NETWORK.includes(network.networkId!);
 }
 
 /**

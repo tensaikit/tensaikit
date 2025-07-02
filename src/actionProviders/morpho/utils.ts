@@ -2,7 +2,11 @@
 export const MORPHO_SUPPORTED_SUB_GRAPH = ["polygon-mainnet"];
 
 // List of supported networks for general Morpho Protocol functionality
-export const MORPHO_SUPPORTED_PROTOCOL = ["polygon-mainnet", "katana-network"];
+export const MORPHO_SUPPORTED_PROTOCOL = [
+  "polygon-mainnet",
+  "katana-mainnet",
+  "katana-testnet",
+];
 
 /**
  * Returns the on-chain contract address for the Morpho Blue protocol
@@ -14,8 +18,10 @@ export const MORPHO_SUPPORTED_PROTOCOL = ["polygon-mainnet", "katana-network"];
  */
 export const getMorphoBlueContractAddress = (chainId: number) => {
   switch (chainId) {
-    case 129399: // Katana
+    case 129399: // Katana Testnet
       return "0xC263190b99ceb7e2b7409059D24CB573e3bB9021";
+    case 747474: // Katana Mainnet
+      return "0xD50F2DffFd62f94Ee4AEd9ca05C61d0753268aBc";
     case 137: // Polygon POS
       return "0x1bF0c2541F820E775182832f06c0B7Fc27A25f67";
     default:

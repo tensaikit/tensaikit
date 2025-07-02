@@ -49,10 +49,12 @@ export const getSpender = (chainId: number): `0x${string}` => {
  */
 export const subGraphUrlByChainId = (chainId: number) => {
   switch (chainId) {
-    case 129399: // Katana
+    case 747474: // Katana
       return "https://gateway-arbitrum.network.thegraph.com/api/subgraphs/id/2YG7eSFHx1Wm9SHKdcrM8HR23JQpVe8fNNdmDHMXyVYR";
 
     default:
-      throw new Error(`${chainId} not supported for Morpho Blue.`);
+      throw new Error(`${chainId} not supported for Sushi Subgraph.`);
   }
 };
+
+export const SUSHISWAP_SUPPORTED_NETWORK = ["katana-mainnet", "katana-testnet"];
