@@ -19,7 +19,7 @@ export interface PrivyEvmWalletConfig extends PrivyWalletConfig {
 /**
  * A wallet provider that uses Privy's server wallet API.
  * This provider extends the ViemWalletProvider to provide Privy-specific wallet functionality
- * while maintaining compatibility with the base wallet provider interface.
+ * while maintaining compatibility with the wallet provider interface.
  */
 export class PrivyEvmWalletProvider extends ViemWalletProvider {
   #walletId: string;

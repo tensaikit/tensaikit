@@ -1,4 +1,4 @@
-// SushiSwap base API endpoints
+// SushiSwap API endpoints
 export const SUSHI_ENDPOINT = "https://api.sushi.com";
 export const SUSHI_QUOTE_ENDPOINT = SUSHI_ENDPOINT + "/quote/v7";
 export const SUSHI_TOKEN_ENDPOINT = SUSHI_ENDPOINT + "/token/v1";
