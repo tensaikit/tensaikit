@@ -20,6 +20,14 @@ alchemy/
   - Supports multiple tokens in a single request
   - Returns balance in USD
 
+## Environment Variables
+
+Set your API key via .env or pass it directly to the provider during initialization.
+
+```env
+ALCHEMY_API_KEY=your-api-key
+```
+
 ## Notes
 
 - Requires an **Alchemy API Key** for authentication. Visit the [Alchemy Dashboard](https://dashboard.alchemy.com/) to get your key.

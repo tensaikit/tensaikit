@@ -2,11 +2,11 @@ import z from "zod";
 import { ActionProvider } from "../../actionProvider";
 import { CreateAction } from "../../actionDecorator";
 import { EvmWalletProvider } from "../../../walletProviders";
-import { handleError } from "../../../common/errors";
-import { fetchFromApi, objectToString } from "../../../common/utils";
+import { createError, ErrorCode, handleError } from "../../../common/errors";
 import { Network } from "../../../network";
 import { GetLiquidityProvidersSchema } from "../schemas";
-import { SUSHI_LIQUIDITY_ENDPOINT } from "../utlis";
+import { fetchLiquidityProviders } from "../logic";
+import { wrapAndStringify } from "../../../common/utils";
 
 /**
  * This class provides SushiSwap liquidity-related actions.
@@ -14,7 +14,7 @@ import { SUSHI_LIQUIDITY_ENDPOINT } from "../utlis";
  */
 export class SushiSwapLiquidityActions extends ActionProvider<EvmWalletProvider> {
   constructor() {
-    super("sushiSwap.liquidity", []);
+    super("sushi_swap.liquidity", []);
   }
 
   /**
@@ -37,10 +37,17 @@ export class SushiSwapLiquidityActions extends ActionProvider<EvmWalletProvider>
   ): Promise<string> {
     try {
       const chainId = walletProvider.getNetwork().chainId;
-      const response = await fetchFromApi<unknown>(
-        `${SUSHI_LIQUIDITY_ENDPOINT}/${chainId}`
+      if (!chainId) {
+        throw createError(
+          "Invalid or missing chain ID",
+          ErrorCode.INVALID_NETWORK
+        );
+      }
+      const response = await fetchLiquidityProviders(chainId);
+      return wrapAndStringify(
+        "sushi_swap.liquidity.get_liquidity_providers",
+        response
       );
-      return objectToString(response);
     } catch (error) {
       throw handleError("Failed to retrieve liquidity providers", error);
     }

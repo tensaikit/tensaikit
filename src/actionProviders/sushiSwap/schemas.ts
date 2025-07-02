@@ -50,3 +50,12 @@ export const GetExecuteSwapSchema = z.object({
     .number()
     .describe("Maximum allowed slippage for the swap, e.g., 0.005 for 0.5%"),
 });
+
+export const QueryGetSushiAllTokens = z.object({
+  first: z
+    .number()
+    .int()
+    .min(1, "Minimum value must be 1")
+    .max(100, "Maximum value allowed is 100"),
+  skip: z.number().int().min(0, "Skip must be 0 or greater"),
+});
