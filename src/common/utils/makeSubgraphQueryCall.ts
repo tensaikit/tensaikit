@@ -3,14 +3,20 @@ import { fetchFromApi } from "./fetchFromApi";
 export const makeSubgraphQueryCall = async (
   subgraphURL: string,
   subgraphQuery: { query: string; variables?: Record<string, any> },
-  apiKey: string
+  apiKey?: string
 ) => {
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (apiKey) {
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    }
+
     const response = await fetchFromApi<any>(subgraphURL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey || ""}`,
-      },
+      headers,
       body: subgraphQuery,
     });
 
