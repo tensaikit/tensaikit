@@ -108,20 +108,7 @@ export class SushiSwapTokenActions extends ActionProvider<EvmWalletProvider> {
     args: z.infer<typeof QueryGetSushiAllTokens>
   ): Promise<string> {
     try {
-      const network = walletProvider.getNetwork();
-      const chainId = network.chainId;
-      if (!chainId) {
-        throw createError(
-          "Invalid or missing network",
-          ErrorCode.INVALID_NETWORK
-        );
-      }
-
-      const response = await fetchAllTokensFromSubgraph(
-        chainId,
-        args,
-        this.subGraphApiKey
-      );
+      const response = await fetchAllTokensFromSubgraph(walletProvider, args);
       return wrapAndStringify(
         "sushi_swap.token.get_all_sushi_tokens",
         response

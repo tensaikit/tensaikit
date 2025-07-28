@@ -91,6 +91,13 @@ export const queryWhitelistedVaults = (variables: {
                         description
                         image
                     }
+                    asset {
+                      decimals
+                      id
+                      isWhitelisted
+                      name
+                      symbol
+                    }
                     warnings {
                         level
                         type
