@@ -1,37 +1,49 @@
-import { handleError } from "../../../common/errors";
+import { z } from "zod";
+import { createError, ErrorCode, handleError } from "../../../common/errors";
 import { makeSubgraphQueryCall } from "../../../common/utils";
+import { EvmWalletProvider } from "../../../walletProviders";
+import { QueryGetSushiAllTokens } from "../schemas";
 import { querySushiSwapAllTokens } from "../subGraphQuery";
-import { subGraphUrlByChainId } from "../utlis";
+import { SUSHI_SWAP_GRAPH_URL } from "../utlis";
 
 /**
  * Fetches a paginated list of tokens from the SushiSwap subgraph for a given chain.
  *
- * @param chainId - The chain ID representing the target blockchain network.
  * @param args - An object containing pagination parameters:
  *   - skip: Number of items to skip (for pagination).
  *   - first: Number of items to fetch.
- * @param subGraphApiKey - The API key used for authenticating with the subgraph service.
  * @returns A promise resolving to an array of token objects, or a string message if no data is found.
  * @throws Throws a formatted error if the subgraph query fails.
  */
 export const fetchAllTokensFromSubgraph = async (
-  chainId: string,
-  args: { skip: number; first: number },
-  subGraphApiKey: string
+  walletProvider: EvmWalletProvider,
+  args: z.infer<typeof QueryGetSushiAllTokens>
 ) => {
   try {
-    const subGraphUrl = subGraphUrlByChainId(Number(chainId));
+    const network = walletProvider.getNetwork();
+    const chainId = network.chainId;
+
+    if (!chainId) {
+      throw createError(
+        "Invalid or missing network",
+        ErrorCode.INVALID_NETWORK
+      );
+    }
+
     const response = await makeSubgraphQueryCall(
-      subGraphUrl,
-      querySushiSwapAllTokens({ skip: args.skip, first: args.first }),
-      subGraphApiKey
+      SUSHI_SWAP_GRAPH_URL,
+      querySushiSwapAllTokens({
+        skip: args.skip,
+        first: args.first,
+        chainId: Number(chainId),
+      })
     );
 
-    if (!response || !response.tokens) {
+    if (!response || !response.tokenList) {
       return `No token data found.`;
     }
 
-    return response.tokens;
+    return response.tokenList;
   } catch (error: any) {
     throw handleError("Failed to fetch all tokens from subgraph", error);
   }

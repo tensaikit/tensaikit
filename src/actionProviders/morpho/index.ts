@@ -1,3 +1,4 @@
 export * from "./schemas";
-export * from "./morphoProtocolActionProvider";
+export * from "./morphoReadActionProvider";
+export * from "./morphoWriteActionProvider";
 export * from "./morphoSubgraphActionProvider";
