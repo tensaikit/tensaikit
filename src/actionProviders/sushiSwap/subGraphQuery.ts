@@ -1,21 +1,18 @@
 export const querySushiSwapAllTokens = (variables: {
+  chainId: number;
   skip: number;
   first: number;
 }) => {
   return {
-    query: `query tokens($skip: Int!, $first: Int!) {
-      tokens(
-        skip: $skip
-        first: $first
-      ) {
-        id
-        name
+    query: `query TokenList($chainId: TokenListChainId!, $first: Int, $skip: Int) {
+      tokenList(chainId: $chainId, first: $first, skip: $skip) {
+        address
         symbol
+        name
         decimals
-        poolCount
-        volume
-      }
-    }`,
+        approved
+  }
+}`,
     variables: variables,
   };
 };

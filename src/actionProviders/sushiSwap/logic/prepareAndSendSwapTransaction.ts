@@ -110,7 +110,7 @@ export const prepareAndSendSwapTransaction = async (
     // Step 2: Simulate swap
     // TODO: Remove below code once Katana is available on Viem and is public
     let publicClient: PublicClient;
-    if (chainId === "129399") {
+    if (chainId === "129399" || chainId === "747474") {
       publicClient = createPublicClient({
         chain: walletProvider.getChain(),
         transport: http(),

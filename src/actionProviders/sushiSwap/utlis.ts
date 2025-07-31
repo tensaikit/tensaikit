@@ -57,4 +57,7 @@ export const subGraphUrlByChainId = (chainId: number) => {
   }
 };
 
+export const SUSHI_SWAP_GRAPH_URL =
+  "https://production.data-gcp.sushi.com/graphql";
+
 export const SUSHISWAP_SUPPORTED_NETWORK = ["katana-mainnet", "katana-testnet"];

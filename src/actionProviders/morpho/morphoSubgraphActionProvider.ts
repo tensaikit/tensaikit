@@ -3,296 +3,245 @@ import { CreateAction } from "../actionDecorator";
 import { ActionProvider } from "../actionProvider";
 import { EvmWalletProvider } from "../../walletProviders";
 import { Network } from "../../network";
-import { MORPHO_SUPPORTED_SUB_GRAPH, subGraphUrlByChainId } from "./utils";
+import { MORPHO_SUPPORTED_SUB_GRAPH } from "./utils";
 import {
   ActiveMarketsQuerySchema,
-  BorrowerInterestRateSchema,
-  LenderInterestRateSchema,
-  QueryAccountSchema,
+  CuratorsQuerySchema,
+  MarketStateByUniqueKeySchema,
+  UserDataQuerySchema,
+  WhitelistedVaultsQuerySchema,
 } from "./schemas";
-import { createError, ErrorCode, handleError } from "../../common/errors";
-import { makeSubgraphQueryCall } from "../../common/utils/makeSubgraphQueryCall";
-import {
-  queryAccountById,
-  queryInterestRates,
-  queryLenderInterestRates,
-  queryMarkets,
-} from "./subGraphQuery";
+import { handleError } from "../../common/errors";
 import { wrapAndStringify } from "../../common/utils";
-
-/**
- * Configuration options for initializing the MorphoSubgraphActionProvider.
- */
-export interface MorphoActionProviderConfig {
-  // Subgraph API key (required for queries)
-  subGraphApiKey?: string;
-}
+import { fetchWhitelistedMarkets } from "./logic/fetchWhitelistedMarkets";
+import { fetchWhitelistedVaults } from "./logic/fetchWhitelistedVaults";
+import { fetchMarketStateByUniqueKey } from "./logic/fetchMarketStateByUniqueKey";
+import { fetchUserDataByAddress } from "./logic/fetchUserDataByAddress";
+import { fetchCurators } from "./logic/fetchCurators";
 
 /**
  * Provides subgraph-based read-only actions for Morpho Blue protocol.
  * Includes interest rates, active markets, and account-level data queries.
  */
 export class MorphoSubgraphActionProvider extends ActionProvider<EvmWalletProvider> {
-  private readonly subGraphApiKey: string;
-
   /**
    * Initializes the Morpho Subgraph Action Provider
-   *
-   * @param config - Configuration containing subgraph API key
    */
-  constructor(config: MorphoActionProviderConfig = {}) {
+  constructor() {
     super("morpho.subgraph", []);
-
-    config.subGraphApiKey ||= process.env.SUBGRAPH_API_KEY || "";
-    if (!config.subGraphApiKey) {
-      throw new Error("SUBGRAPH_API_KEY is not configured.");
-    }
-    this.subGraphApiKey = config.subGraphApiKey;
   }
 
   /**
-   * Fetches account-level activity and position data from the Morpho Blue subgraph.
+   * Retrieves a list of active (whitelisted) Morpho Blue markets with configuration and state metrics.
    *
-   * @param walletProvider - Instance of EVM-compatible WalletProvider
-   * @param args - Includes `account` (Ethereum address), `skip`, and `first` for pagination
-   * @returns A JSON string containing user activity and position breakdown
-   * @throws If the network is invalid or subgraph call fails
-   */
-  @CreateAction({
-    name: "query_account",
-    description: `
-    This action retrieves account-level data from the Morpho Blue subgraph.
-
-    Inputs:
-    - account: Ethereum address of the user (lowercase, checksummed not required)
-    - skip: Number of records to skip (used for pagination).
-    - first: Number of records to fetch (max 100).
-
-    This includes:
-    - Counts of deposits, borrows, repays, withdrawals, positions
-    - Detailed info about positions
-  `,
-    schema: QueryAccountSchema,
-  })
-  async queryAccount(
-    walletProvider: EvmWalletProvider,
-    args: z.infer<typeof QueryAccountSchema>
-  ): Promise<string> {
-    try {
-      const network = walletProvider.getNetwork();
-      const chainId = network.chainId;
-      if (!chainId) {
-        throw createError(
-          "Invalid or missing network",
-          ErrorCode.INVALID_NETWORK
-        );
-      }
-
-      const subGraphUrl = subGraphUrlByChainId(Number(chainId));
-      const response = await makeSubgraphQueryCall(
-        subGraphUrl,
-        queryAccountById(args.account, args.first, args.skip),
-        this.subGraphApiKey
-      );
-
-      if (!response || !response.account) {
-        return wrapAndStringify(
-          "morpho.subgraph.query_account",
-          `No data found for account: ${args.account}`
-        );
-      }
-
-      return wrapAndStringify(
-        "morpho.subgraph.query_account",
-        response.account
-      );
-    } catch (error) {
-      throw handleError("Error fetching Morpho account", error);
-    }
-  }
-
-  /**
-   * Fetches the current interest rates offered to lenders across Morpho Blue markets.
+   * This function queries the Morpho subgraph to return market entries that are whitelisted,
+   * including supply/borrow APYs, token details, oracle and interest rate model configuration,
+   * utilization, collateral stats, and overall TVL.
    *
-   * @param walletProvider - Instance of EVM-compatible WalletProvider
-   * @param args - Includes `skip` and `first` to control pagination
-   * @returns A JSON string array of lender interest rate entries
-   * @throws If the network is invalid or subgraph query fails
-   */
-  @CreateAction({
-    name: "get_lender_interest_rates",
-    description: `
-    This action fetches the current interest rates offered to lenders 
-    in Morpho Blue markets. The rates are sorted by the market's 
-    total value locked (TVL) in descending order.
-
-    Inputs:
-    - skip: Number of records to skip (used for pagination).
-    - first: Number of records to fetch (max 100).
-
-    The results include:
-    - id: Unique interest rate record ID
-    - rate: Interest rate offered to lenders
-    - side: Should always be 'LENDER'
-  `,
-    schema: LenderInterestRateSchema,
-  })
-  async getLenderInterestRates(
-    walletProvider: any,
-    args: z.infer<typeof LenderInterestRateSchema>
-  ): Promise<string> {
-    try {
-      const network = walletProvider.getNetwork();
-      const chainId = network.chainId;
-      if (!chainId) {
-        throw createError(
-          "Invalid or missing network",
-          ErrorCode.INVALID_NETWORK
-        );
-      }
-
-      const subGraphUrl = subGraphUrlByChainId(Number(chainId));
-      const response = await makeSubgraphQueryCall(
-        subGraphUrl,
-        queryLenderInterestRates({ first: args.first, skip: args.skip }),
-        this.subGraphApiKey
-      );
-
-      if (!response || !response.interestRates) {
-        return wrapAndStringify(
-          "morpho.subgraph.get_lender_interest_rates",
-          "No data found!"
-        );
-      }
-
-      return wrapAndStringify(
-        "morpho.subgraph.get_lender_interest_rates",
-        response.interestRates
-      );
-    } catch (error) {
-      throw handleError("Error fetching Morpho account", error);
-    }
-  }
-
-  /**
-   * Fetches the current borrowing interest rates across Morpho Blue markets.
+   * Useful for building dashboards or letting users explore markets available for lending/borrowing.
    *
-   * @param walletProvider - Instance of EVM-compatible WalletProvider
-   * @param args - Includes `skip` and `first` to control pagination
-   * @returns A JSON string array of borrower interest rate entries
-   * @throws If the network is invalid or subgraph query fails
-   */
-  @CreateAction({
-    name: "get_borrower_interest_rates",
-    description: `
-    This action fetches the current interest rates paid by borrowers 
-    in Morpho Blue markets. The rates are sorted by the market's 
-    total value locked (TVL) in descending order.
-
-    Inputs:
-    - skip: Number of records to skip (for pagination)
-    - first: Number of records to fetch (max 100)
-
-    Each result includes:
-    - id: Unique rate record ID
-    - rate: Borrowing interest rate
-    - side: Should always be 'BORROWER'
-  `,
-    schema: BorrowerInterestRateSchema,
-  })
-  async getBorrowerInterestRates(
-    walletProvider: any,
-    args: z.infer<typeof BorrowerInterestRateSchema>
-  ): Promise<string> {
-    try {
-      const network = walletProvider.getNetwork();
-      const chainId = network.chainId;
-      if (!chainId) {
-        throw createError(
-          "Invalid or missing network",
-          ErrorCode.INVALID_NETWORK
-        );
-      }
-
-      const subGraphUrl = subGraphUrlByChainId(Number(chainId));
-      const response = await makeSubgraphQueryCall(
-        subGraphUrl,
-        queryInterestRates({ first: args.first, skip: args.skip }),
-        this.subGraphApiKey
-      );
-
-      if (!response || !response.interestRates) {
-        return wrapAndStringify(
-          "morpho.subgraph.get_borrower_interest_rates",
-          "No data found!"
-        );
-      }
-
-      return wrapAndStringify(
-        "morpho.subgraph.get_borrower_interest_rates",
-        response.interestRates
-      );
-    } catch (error) {
-      throw handleError("Error fetching Morpho account", error);
-    }
-  }
-
-  /**
-   * Fetches active markets listed on the Morpho Blue protocol with detailed statistics.
+   * @param walletProvider - Instance of EVM-compatible wallet provider.
+   * @param args - Pagination input including:
+   *   - `skip`: Number of items to skip.
+   *   - `first`: Number of items to fetch (max 100).
    *
-   * @param walletProvider - Instance of EVM-compatible WalletProvider
-   * @param args - Includes `skip` and `first` to control pagination
-   * @returns A JSON string array of active Morpho markets with config and metric data
-   * @throws If the network is invalid or subgraph call fails
+   * @returns A Promise resolving to a JSON string of active Morpho Blue markets.
+   *
+   * @throws Will throw an error if:
+   *  - The network is not supported or is invalid.
+   *  - The subgraph query fails or returns an invalid result.
    */
   @CreateAction({
     name: "get_active_markets",
     description: `
-    This action fetches active Morpho Blue markets with detailed statistics and configuration.
+    This action fetches active (whitelisted) Morpho Blue markets along with configuration and performance metrics.
 
     Inputs:
     - skip: Number of entries to skip for pagination.
-    - first: Number of entries to fetch (up to 1000).
+    - first: Number of entries to fetch (max 100).
 
     Each market entry includes:
-    - token info, oracle, rates, protocol, interest model, utilization metrics, and TVL
+    - Token metadata (loan/collateral)
+    - Oracle and interest rate model configuration
+    - Max LTV, supply and borrow rates
+    - Utilization metrics, TVL, and APR rewards
   `,
     schema: ActiveMarketsQuerySchema,
   })
   async getActiveMarkets(
-    walletProvider: any,
+    walletProvider: EvmWalletProvider,
     args: z.infer<typeof ActiveMarketsQuerySchema>
   ): Promise<string> {
     try {
-      const network = walletProvider.getNetwork();
-      const chainId = network.chainId;
-      if (!chainId) {
-        throw createError(
-          "Invalid or missing network",
-          ErrorCode.INVALID_NETWORK
-        );
-      }
-
-      const subGraphUrl = subGraphUrlByChainId(Number(chainId));
-      const response = await makeSubgraphQueryCall(
-        subGraphUrl,
-        queryMarkets({ first: args.first, skip: args.skip }),
-        this.subGraphApiKey
-      );
-
-      if (!response || !response.markets) {
-        return wrapAndStringify(
-          "morpho.subgraph.get_active_markets",
-          "No data found!"
-        );
-      }
-
-      return wrapAndStringify(
-        "morpho.subgraph.get_active_markets",
-        response.markets
-      );
+      const response = await fetchWhitelistedMarkets(walletProvider, args);
+      return wrapAndStringify("morpho.subgraph.get_active_markets", response);
     } catch (error) {
       throw handleError("Error fetching Morpho markets", error);
+    }
+  }
+
+  /**
+   * Retrieves all whitelisted vaults available on the Morpho Blue protocol for the current network.
+   *
+   * Each vault contains metadata (name, symbol, creator), performance data (APY, total assets), and reward info.
+   * Useful for users selecting yield strategies or analyzing vaults curated by the protocol.
+   *
+   * @param walletProvider - Instance of EVM-compatible wallet provider.
+   * @param args - Pagination input including:
+   *   - `skip`: Number of items to skip.
+   *   - `first`: Number of items to fetch (max 100).
+   *
+   * @returns A Promise resolving to a JSON string array of whitelisted vaults.
+   *
+   * @throws Will throw if the network is unsupported or the query fails.
+   */
+  @CreateAction({
+    name: "get_whitelisted_vaults",
+    description: `
+    This action fetches whitelisted vaults from the Morpho Blue subgraph for the current chain.
+
+    Inputs:
+    - skip: Number of entries to skip for pagination.
+    - first: Number of entries to fetch (max 100).
+
+    Each vault includes:
+    - Vault metadata (name, creator, image)
+    - Total assets, APY, rewards info
+    - Whitelist and verification status
+  `,
+    schema: WhitelistedVaultsQuerySchema,
+  })
+  async getWhitelistedVaults(
+    walletProvider: EvmWalletProvider,
+    args: z.infer<typeof WhitelistedVaultsQuerySchema>
+  ): Promise<string> {
+    try {
+      const response = await fetchWhitelistedVaults(walletProvider, args);
+      return wrapAndStringify(
+        "morpho.subgraph.get_whitelisted_vaults",
+        response
+      );
+    } catch (error) {
+      throw handleError("Error fetching Morpho vaults", error);
+    }
+  }
+
+  /**
+   * Fetches the current state of a specific Morpho Blue market using its unique key.
+   *
+   * This action returns on-chain metrics such as TVL, supply/borrow amounts, liquidity,
+   * and performance rates (APY, APR). Useful for tracking market health and performance.
+   *
+   * @param walletProvider - Connected EVM-compatible wallet provider.
+   * @param args - Includes a valid `uniqueKey` and `chainId` to identify the market.
+   *
+   * @returns A Promise resolving to a JSON string of market state details.
+   *
+   * @throws If the network is not supported or subgraph query fails.
+   */
+  @CreateAction({
+    name: "get_market_state_by_unique_key",
+    description: `
+    Fetches detailed state information of a Morpho Blue market using its unique key.
+
+    Inputs:
+    - uniqueKey: Unique identifier of the market (hex string)
+    - chainId: Chain ID of the network (e.g., 137, 8453)
+
+    The response includes:
+    - Collateral, borrow, supply, and liquidity values (raw + USD)
+    - Historical and daily APYs
+    - Reward rates (APR)
+  `,
+    schema: MarketStateByUniqueKeySchema,
+  })
+  async getMarketStateByUniqueKey(
+    walletProvider: EvmWalletProvider,
+    args: z.infer<typeof MarketStateByUniqueKeySchema>
+  ): Promise<string> {
+    try {
+      const response = await fetchMarketStateByUniqueKey(walletProvider, args);
+      return wrapAndStringify(
+        "morpho.subgraph.get_market_state_by_unique_key",
+        response
+      );
+    } catch (error) {
+      throw handleError("Error fetching market state by unique key", error);
+    }
+  }
+
+  /**
+   * Retrieves complete portfolio data for the connected wallet in Morpho Blue protocol.
+   *
+   * This includes vault and market positions (with PnL, balances, and USD values), and recent transactions.
+   * Ideal for building user dashboards or financial summaries.
+   *
+   * @param walletProvider - Connected EVM-compatible wallet provider.
+   *
+   * @returns A Promise resolving to a JSON string of the user's positions and activity.
+   *
+   * @throws Will throw if the network is unsupported or query fails.
+   */
+  @CreateAction({
+    name: "get_user_portfolio_data",
+    description: `
+    Fetches a user's full portfolio data on Morpho Blue, including vault and market positions.
+
+    Inputs: (No manual input, wallet address is derived from provider)
+
+    The response includes:
+    - Market positions: borrow/supply/collateral + PnL
+    - Vault holdings: assets, shares, USD value
+    - Recent transaction history (hash, type, timestamp)
+  `,
+    schema: UserDataQuerySchema,
+  })
+  async getUserPortfolioData(
+    walletProvider: EvmWalletProvider
+  ): Promise<string> {
+    try {
+      const response = await fetchUserDataByAddress(walletProvider);
+      return wrapAndStringify(
+        "morpho.subgraph.get_user_portfolio_data",
+        response
+      );
+    } catch (error) {
+      throw handleError("Error fetching user portfolio data", error);
+    }
+  }
+
+  /**
+   * Fetches all curators registered on the Morpho Blue protocol for the connected network.
+   *
+   * Each curator includes metadata (name, image), AUM, and verification status.
+   * Useful for filtering vaults or recommending trusted curators to users.
+   *
+   * @param walletProvider - Instance of EVM-compatible wallet provider.
+   *
+   * @returns A Promise resolving to a JSON string of curators.
+   *
+   * @throws If the network is unsupported or the subgraph call fails.
+   */
+  @CreateAction({
+    name: "get_curators",
+    description: `
+    This action fetches all verified curators on Morpho Blue for the current chain.
+
+    Inputs: None
+
+    Each curator includes:
+    - Name and image
+    - Total AUM (Assets Under Management)
+    - Verification status
+  `,
+    schema: CuratorsQuerySchema,
+  })
+  async getCurators(walletProvider: EvmWalletProvider): Promise<string> {
+    try {
+      const response = await fetchCurators(walletProvider);
+      return wrapAndStringify("morpho.subgraph.get_curators", response);
+    } catch (error) {
+      throw handleError("Error fetching curators", error);
     }
   }
 

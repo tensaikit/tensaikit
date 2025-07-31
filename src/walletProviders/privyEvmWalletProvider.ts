@@ -121,10 +121,13 @@ export class PrivyEvmWalletProvider extends ViemWalletProvider {
       privy,
     });
 
-    const chainId = config.chainId || "129399";
+    const chainId = config.chainId || "747474";
 
     // TODO: Remove below code once Katana is available on Viem and is public
-    const chain = chainId === "129399" ? config.chain : getChain(chainId);
+    const chain =
+      chainId === "129399" || chainId === "747474"
+        ? config.chain
+        : getChain(chainId);
     if (!chain) {
       throw new Error(`Chain with ID ${chainId} not found`);
     }

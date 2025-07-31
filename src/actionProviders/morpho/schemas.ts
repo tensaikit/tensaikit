@@ -12,6 +12,24 @@ export const GetMarketInfoSchema = z
   })
   .describe("Input schema for fetching Morpho Blue market parameters");
 
+export const GetMarketStatesSchema = z
+  .object({
+    marketId: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid marketId (bytes32 hex)")
+      .describe("The unique bytes32 identifier of the Morpho Blue market"),
+  })
+  .describe("Input schema for fetching Morpho Blue market state");
+
+export const GetMarketPositionInfoSchema = z
+  .object({
+    marketId: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid marketId (bytes32 hex)")
+      .describe("The unique bytes32 identifier of the Morpho Blue market"),
+  })
+  .describe("Input schema for fetching Position on Morpho Blue market");
+
 /**
  * Input schema for Morpho Blue supply action.
  */
@@ -112,20 +130,6 @@ export const RepaySchema = z
   })
   .describe("Input schema for Morpho Blue repay action");
 
-export const QueryAccountSchema = z.object({
-  account: z
-    .string()
-    .min(42, "Invalid address length")
-    .max(42, "Invalid address length")
-    .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
-  first: z
-    .number()
-    .int()
-    .min(1, "Minimum value must be 1")
-    .max(100, "Maximum value allowed is 100"),
-  skip: z.number().int().min(0, "Skip must be 0 or greater"),
-});
-
 export const LenderInterestRateSchema = z.object({
   skip: z.number().int().min(0, "Skip must be 0 or greater"),
   first: z
@@ -152,3 +156,23 @@ export const ActiveMarketsQuerySchema = z.object({
     .min(1, "Minimum value must be 1")
     .max(100, "Maximum value allowed is 100"),
 });
+
+export const WhitelistedVaultsQuerySchema = z.object({
+  skip: z.number().int().min(0, "Skip must be 0 or greater"),
+  first: z
+    .number()
+    .int()
+    .min(1, "Minimum value must be 1")
+    .max(100, "Maximum value allowed is 100"),
+});
+
+export const MarketStateByUniqueKeySchema = z.object({
+  uniqueKey: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid uniqueKey (bytes32 hex)")
+    .describe("Unique market identifier (bytes32 hex string)"),
+});
+
+export const CuratorsQuerySchema = z.object({});
+
+export const UserDataQuerySchema = z.object({});
