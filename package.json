@@ -1,6 +1,6 @@
 {
   "name": "tensaikit",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An autonomous DeFi AI Agent Kit on Katana enabling AI agents to plan and execute on-chain financial operations.",
   "author": "tensaikit",
   "main": "dist/index.js",
